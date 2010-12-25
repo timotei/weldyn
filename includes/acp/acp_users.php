@@ -1340,6 +1340,7 @@ class acp_users
 					'msn'			=> request_var('msn', $user_row['user_msnm']),
 					'yim'			=> request_var('yim', $user_row['user_yim']),
 					'jabber'		=> utf8_normalize_nfc(request_var('jabber', $user_row['user_jabber'], true)),
+					'twitter'		=> request_var('twitter', $user_row['user_twitter']),
 					'website'		=> request_var('website', $user_row['user_website']),
 					'location'		=> utf8_normalize_nfc(request_var('location', $user_row['user_from'], true)),
 					'occupation'	=> utf8_normalize_nfc(request_var('occupation', $user_row['user_occ'], true)),
@@ -1372,6 +1373,7 @@ class acp_users
 							array('string', true, 5, 255),
 							array('jabber')),
 						'yim'			=> array('string', true, 5, 255),
+						'twitter'   	=> array('string', true, 4, 15),
 						'website'		=> array(
 							array('string', true, 12, 255),
 							array('match', true, '#^http[s]?://(.*?\.)*?[a-z0-9\-]+\.[a-z]{2,4}#i')),
@@ -1403,6 +1405,7 @@ class acp_users
 							'user_aim'		=> $data['aim'],
 							'user_msnm'		=> $data['msn'],
 							'user_yim'		=> $data['yim'],
+							'user_twitter'	=> $data['twitter'],
 							'user_jabber'	=> $data['jabber'],
 							'user_website'	=> $data['website'],
 							'user_from'		=> $data['location'],
@@ -1460,6 +1463,7 @@ class acp_users
 					'LOCATION'		=> $data['location'],
 					'OCCUPATION'	=> $data['occupation'],
 					'INTERESTS'		=> $data['interests'],
+					'TWITTER'		=> $data['twitter'],
 
 					'S_BIRTHDAY_DAY_OPTIONS'	=> $s_birthday_day_options,
 					'S_BIRTHDAY_MONTH_OPTIONS'	=> $s_birthday_month_options,

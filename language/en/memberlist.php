@@ -145,6 +145,7 @@ $lang = array_merge($lang, array(
 	'VISITED'				=> 'Last visited',
 
 	'WWW'					=> 'Website',
+	'VIEW_TWITTER'				=> 'View user’s Twitter page',
 ));
 
 ?>

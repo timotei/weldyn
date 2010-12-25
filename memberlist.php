@@ -1024,6 +1024,7 @@ switch ($mode)
 			$yahoo		= request_var('yahoo', '');
 			$msn		= request_var('msn', '');
 			$jabber		= request_var('jabber', '');
+			$twitter	= request_var('twitter', '');
 			$search_group_id	= request_var('search_group_id', 0);
 
 			// when using these, make sure that we actually have values defined in $find_key_match
@@ -1068,6 +1069,7 @@ switch ($mode)
 			$sql_where .= ($yahoo) ? ' AND u.user_yim ' . $db->sql_like_expression(str_replace('*', $db->any_char, $yahoo)) . ' ' : '';
 			$sql_where .= ($msn) ? ' AND u.user_msnm ' . $db->sql_like_expression(str_replace('*', $db->any_char, $msn)) . ' ' : '';
 			$sql_where .= ($jabber) ? ' AND u.user_jabber ' . $db->sql_like_expression(str_replace('*', $db->any_char, $jabber)) . ' ' : '';
+			$sql_where .= ($twitter) ? ' AND u.user_twitter ' . $db->sql_like_expression(str_replace('*', $db->any_char, $twitter)) . ' ' : '';
 			$sql_where .= (is_numeric($count) && isset($find_key_match[$count_select])) ? ' AND u.user_posts ' . $find_key_match[$count_select] . ' ' . (int) $count . ' ' : '';
 			$sql_where .= (sizeof($joined) > 1 && isset($find_key_match[$joined_select])) ? " AND u.user_regdate " . $find_key_match[$joined_select] . ' ' . gmmktime(0, 0, 0, intval($joined[1]), intval($joined[2]), intval($joined[0])) : '';
 			$sql_where .= ($auth->acl_get('u_viewonline') && sizeof($active) > 1 && isset($find_key_match[$active_select])) ? " AND u.user_lastvisit " . $find_key_match[$active_select] . ' ' . gmmktime(0, 0, 0, $active[1], intval($active[2]), intval($active[0])) : '';
@@ -1399,6 +1401,7 @@ switch ($mode)
 				'YAHOO'		=> $yahoo,
 				'MSNM'		=> $msn,
 				'JABBER'	=> $jabber,
+				'TWITTER'	=> $twitter,
 				'JOINED'	=> implode('-', $joined),
 				'ACTIVE'	=> implode('-', $active),
 				'COUNT'		=> $count,
@@ -1555,6 +1558,7 @@ switch ($mode)
 			'MSN_IMG'		=> $user->img('icon_contact_msnm', $user->lang['MSNM']),
 			'YIM_IMG'		=> $user->img('icon_contact_yahoo', $user->lang['YIM']),
 			'JABBER_IMG'	=> $user->img('icon_contact_jabber', $user->lang['JABBER']),
+			'TWITTER_IMG'    => $user->img('icon_contact_twit', $user->lang['TWITTER']),
 			'SEARCH_IMG'	=> $user->img('icon_user_search', $user->lang['SEARCH']),
 
 			'U_FIND_MEMBER'			=> ($config['load_search'] || $auth->acl_get('a_')) ? append_sid("{$phpbb_root_path}memberlist.$phpEx", 'mode=searchuser' . (($start) ? "&amp;start=$start" : '') . (!empty($params) ? '&amp;' . implode('&amp;', $params) : '')) : '',
@@ -1705,6 +1709,7 @@ function show_profile($data, $user_notes_enabled = false, $warn_user_enabled = f
 		'USER_MSN'			=> $data['user_msnm'],
 		'USER_JABBER'		=> $data['user_jabber'],
 		'USER_JABBER_IMG'	=> ($data['user_jabber']) ? $user->img('icon_contact_jabber', $data['user_jabber']) : '',
+		'USER_TWITTER'		=> $data['user_twitter'],
 
 		'L_VIEWING_PROFILE'	=> sprintf($user->lang['VIEWING_PROFILE'], $username),
 	);

@@ -227,6 +227,7 @@ $lang = array_merge($lang, array(
 	'IMG_ICON_CONTACT_PM'		=> 'Send message',
 	'IMG_ICON_CONTACT_YAHOO'	=> 'YIM',
 	'IMG_ICON_CONTACT_WWW'		=> 'Website',
+    	'IMG_ICON_CONTACT_TWIT'		=> 'Twitter',
 
 	'IMG_ICON_POST_DELETE'			=> 'Delete post',
 	'IMG_ICON_POST_EDIT'			=> 'Edit post',

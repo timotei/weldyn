@@ -278,6 +278,7 @@ class ucp_profile
 					'location'		=> utf8_normalize_nfc(request_var('location', $user->data['user_from'], true)),
 					'occupation'	=> utf8_normalize_nfc(request_var('occupation', $user->data['user_occ'], true)),
 					'interests'		=> utf8_normalize_nfc(request_var('interests', $user->data['user_interests'], true)),
+					'twitter'		=> request_var('twitter', $user->data['user_twitter']),
 				);
 
 				if ($config['allow_birthdays'])
@@ -312,6 +313,7 @@ class ucp_profile
 						'website'		=> array(
 							array('string', true, 12, 255),
 							array('match', true, '#^http[s]?://(.*?\.)*?[a-z0-9\-]+\.[a-z]{2,4}#i')),
+						'twitter'   		=> array('string', true, 4, 15),
 						'location'		=> array('string', true, 2, 100),
 						'occupation'	=> array('string', true, 2, 500),
 						'interests'		=> array('string', true, 2, 500),
@@ -363,6 +365,7 @@ class ucp_profile
 							'user_from'		=> $data['location'],
 							'user_occ'		=> $data['occupation'],
 							'user_interests'=> $data['interests'],
+							'user_twitter'	=> $data['twitter'],
 							'user_notify_type'	=> $data['notify'],
 						);
 
@@ -434,6 +437,7 @@ class ucp_profile
 					'LOCATION'	=> $data['location'],
 					'OCCUPATION'=> $data['occupation'],
 					'INTERESTS'	=> $data['interests'],
+					'TWITTER'	=> $data['twitter'],
 				));
 
 				// Get additional profile fields and assign them to the template block var 'profile_fields'
