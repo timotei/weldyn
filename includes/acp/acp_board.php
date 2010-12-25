@@ -186,6 +186,11 @@ class acp_board
 						'posts_per_page'		=> array('lang' => 'POSTS_PER_PAGE',		'validate' => 'int:1',		'type' => 'text:3:4', 'explain' => false),
 						'smilies_per_page'		=> array('lang' => 'SMILIES_PER_PAGE',		'validate' => 'int:1',		'type' => 'text:3:4', 'explain' => false),
 						'hot_threshold'			=> array('lang' => 'HOT_THRESHOLD',			'validate' => 'int:0',		'type' => 'text:3:4', 'explain' => true),
+//-- mod : latest topic title --------------------------------------------------
+//-- add
+						'ltt_max_chars' => array('lang' => 'LTT_MAX_CHARS', 'validate' => 'int:0', 'type' => 'text:3:4', 'explain' => true),
+						'ltt_url' => array('lang' => 'LTT_URL', 'validate' => 'bool', 'type' => 'custom', 'method' => 'ltt_url', 'explain' => false),
+//-- fin mod : latest topic title ----------------------------------------------
 						'max_poll_options'		=> array('lang' => 'MAX_POLL_OPTIONS',		'validate' => 'int:2:127',	'type' => 'text:4:4', 'explain' => false),
 						'max_post_chars'		=> array('lang' => 'CHAR_LIMIT',			'validate' => 'int:0',		'type' => 'text:4:6', 'explain' => true),
 						'min_post_chars'		=> array('lang' => 'MIN_CHAR_LIMIT',		'validate' => 'int:0',		'type' => 'text:4:6', 'explain' => true),
@@ -997,6 +1002,15 @@ class acp_board
 		$cache->destroy('sql', FORUMS_TABLE);
 	}
 
+
+//-- mod : latest topic title --------------------------------------------------
+//-- add
+	function ltt_url($value, $key = '')
+	{
+		$radio_ary = array(0 => 'FIRST_POST', 1 => 'LAST_POST');
+		return h_radio('config[ltt_url]', $radio_ary, $value, $key);
+	}
+//-- fin mod : latest topic title ----------------------------------------------
 }
 
 ?>

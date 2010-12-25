@@ -4710,5 +4710,24 @@ function phpbb_user_session_handler()
 
 	return;
 }
+//-- mod : latest topic title --------------------------------------------------
+//-- add
+function ltt_max_chars($topic_title = '')
+{
+	global $config;
+
+	// no topic title ? so, that forum is empty !
+	if ( empty($topic_title) )
+	{
+		return;
+	}
+
+	// censors ...
+	$topic_title = censor_text($topic_title);
+
+	// reduce the topic title if needed
+	return isset($topic_title[$config['ltt_max_chars']]) ? truncate_string($topic_title, 0, $config['ltt_max_chars'], false, '...') : $topic_title;
+}
+//-- fin mod : latest topic title ----------------------------------------------
 
 ?>

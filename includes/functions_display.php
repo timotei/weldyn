@@ -78,6 +78,12 @@ function display_forums($root_data = '', $display_moderators = true, $return_mod
 		}
 	}
 
+
+//-- mod : latest topic title --------------------------------------------------
+//-- add
+	$sql_array['LEFT_JOIN'][] = array('FROM' => array(TOPICS_TABLE => 't'), 'ON' => 'f.forum_last_post_id = t.topic_last_post_id');
+	$sql_array['SELECT'] .= ', t.topic_id, t.topic_title';
+//-- fin mod : latest topic title ----------------------------------------------
 	if ($show_active)
 	{
 		$sql_array['LEFT_JOIN'][] = array(
@@ -249,6 +255,11 @@ function display_forums($root_data = '', $display_moderators = true, $return_mod
 				$forum_rows[$parent_id]['forum_last_poster_name'] = $row['forum_last_poster_name'];
 				$forum_rows[$parent_id]['forum_last_poster_colour'] = $row['forum_last_poster_colour'];
 				$forum_rows[$parent_id]['forum_id_last_post'] = $forum_id;
+//-- mod : latest topic title --------------------------------------------------
+//-- add
+				$forum_rows[$parent_id]['topic_id'] = $row['topic_id'];
+				$forum_rows[$parent_id]['topic_title'] = $row['topic_title'];
+//-- fin mod : latest topic title ----------------------------------------------
 			}
 		}
 	}
@@ -497,6 +508,12 @@ function display_forums($root_data = '', $display_moderators = true, $return_mod
 			'LAST_POSTER_FULL'		=> get_username_string('full', $row['forum_last_poster_id'], $row['forum_last_poster_name'], $row['forum_last_poster_colour']),
 			'MODERATORS'			=> $moderators_list,
 			'SUBFORUMS'				=> $s_subforums_list,
+//-- mod : latest topic title --------------------------------------------------
+//-- add
+			'LATEST_TOPIC_TITLE_SHORT' => ltt_max_chars($row['topic_title']),
+			'LATEST_TOPIC_TITLE_FULL' => censor_text($row['topic_title']),
+			'U_FIRST_POST' => append_sid("{$phpbb_root_path}viewtopic.$phpEx", 'f=' . $row['forum_id'] . '&amp;t=' . $row['topic_id']),
+//-- fin mod : latest topic title ----------------------------------------------
 
 			'L_SUBFORUM_STR'		=> $l_subforums,
 			'L_FORUM_FOLDER_ALT'	=> $folder_alt,
@@ -529,6 +546,11 @@ function display_forums($root_data = '', $display_moderators = true, $return_mod
 		'UNAPPROVED_IMG'	=> $user->img('icon_topic_unapproved', 'TOPICS_UNAPPROVED'),
 	));
 
+
+//-- mod : latest topic title --------------------------------------------------
+//-- add
+	$template->assign_vars(array('S_LTT' => $config['ltt_url']));
+//-- fin mod : latest topic title ----------------------------------------------
 	if ($return_moderators)
 	{
 		return array($active_forum_ary, $forum_moderators);
