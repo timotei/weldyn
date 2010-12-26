@@ -13,6 +13,43 @@
 </ul>
 <!-- ENDIF -->
 
+
+<!-- IF S_ANNOUNCE_INDEX -->
+<!-- IF .topicrow -->
+		<div class="forabg">
+			<div class="inner"><span class="corners-top"><span></span></span>
+			<ul class="topiclist">
+				<li class="header">
+					<dl class="icon">
+						<dt>{L_ANNOUNCEMENTS}</dt>
+					<dd class="posts">{L_REPLIES}</dd>
+					<dd class="views">{L_VIEWS}</dd>
+					<dd class="lastpost"><span>{L_LAST_POST}</span></dd>
+					</dl>
+				</li>
+			</ul>
+			<ul class="topiclist forums">
+			
+	<!-- BEGIN topicrow -->
+		<li class="row<!-- IF topicrow.S_ROW_COUNT is odd --> bg1<!-- ELSE --> bg2<!-- ENDIF -->">
+			<dl class="icon" style="background-image: url({topicrow.TOPIC_FOLDER_IMG_SRC}); background-repeat: no-repeat;">
+				<dt <!-- IF topicrow.TOPIC_ICON_IMG -->style="background-image: url({T_ICONS_PATH}{topicrow.TOPIC_ICON_IMG}); background-repeat: no-repeat;"<!-- ENDIF -->>
+					<!-- IF topicrow.S_UNREAD --><a href="{topicrow.U_NEWEST_POST}">{NEWEST_POST_IMG}</a> <!-- ENDIF --><a href="{topicrow.U_VIEW_TOPIC}" class="topictitle">{topicrow.TOPIC_TITLE}</a><br />
+					{L_POST_BY_AUTHOR} {topicrow.TOPIC_AUTHOR_FULL} &raquo; {topicrow.FIRST_POST_TIME}
+				</dt>
+				<dd class="posts">{topicrow.REPLIES} <dfn>{L_REPLIES}</dfn></dd>
+				<dd class="views">{topicrow.VIEWS} <dfn>{L_VIEWS}</dfn></dd>
+				<dd class="lastpost"><span><dfn>{L_LAST_POST} </dfn>{L_POST_BY_AUTHOR} {topicrow.TOPIC_LAST_AUTHOR}
+		<!-- IF not S_IS_BOT --><a href="{topicrow.U_LAST_POST}">{LAST_POST_IMG}{LAST_POST_SUBJECT}</a><br />{topicrow.LAST_POST_TIME}</span><!-- ENDIF --></dd>
+			</dl>
+		</li>
+	<!-- END topicrow -->
+			</ul>
+
+			<span class="corners-bottom"><span></span></span></div>
+		</div>
+	<!-- ENDIF -->
+<!-- ENDIF -->
 <!-- INCLUDE forumlist_body.html -->
 
 <!-- IF not S_USER_LOGGED_IN and not S_IS_BOT -->

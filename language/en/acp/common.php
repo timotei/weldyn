@@ -211,6 +211,7 @@ $lang = array_merge($lang, array(
 
 	'ADM_LOGOUT'			=> 'ACP&nbsp;Logout',
 	'ADM_LOGGED_OUT'		=> 'Successfully logged out from Administration Control Panel',
+    'ANNOUNCE_INDEX'        => 'Display Global Announcements on Index Page',
 
 	'BACK'					=> 'Back',
 

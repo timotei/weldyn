@@ -133,10 +133,148 @@ $template->assign_vars(array(
 
 	'S_LOGIN_ACTION'			=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=login'),
 	'S_DISPLAY_BIRTHDAY_LIST'	=> ($config['load_birthdays']) ? true : false,
+    'S_ANNOUNCE_INDEX'  => (!empty($config['announce_index'])) ? true : false,
 
 	'U_MARK_FORUMS'		=> ($user->data['is_registered'] || $config['load_anon_lastread']) ? append_sid("{$phpbb_root_path}index.$phpEx", 'hash=' . generate_link_hash('global') . '&amp;mark=forums') : '',
 	'U_MCP'				=> ($auth->acl_get('m_') || $auth->acl_getf_global('m_')) ? append_sid("{$phpbb_root_path}mcp.$phpEx", 'i=main&amp;mode=front', true, $user->session_id) : '')
 );
+// START Global Announcements
+				$user->add_lang(array('memberlist', 'viewforum'));
+
+				$sql_from = TOPICS_TABLE . ' t ';
+				$sql_select = '';
+
+				if ($config['load_db_track'])
+				{
+					$sql_from .= ' LEFT JOIN ' . TOPICS_POSTED_TABLE . ' tp ON (tp.topic_id = t.topic_id
+						AND tp.user_id = ' . $user->data['user_id'] . ')';
+					$sql_select .= ', tp.topic_posted';
+				}
+
+				if ($config['load_db_lastread'])
+				{
+					$sql_from .= ' LEFT JOIN ' . TOPICS_TRACK_TABLE . ' tt ON (tt.topic_id = t.topic_id
+						AND tt.user_id = ' . $user->data['user_id'] . ')';
+					$sql_select .= ', tt.mark_time';
+				}
+
+				$topic_type = $user->lang['VIEW_TOPIC_GLOBAL'];
+				$folder = 'global_read';
+				$folder_new = 'global_unread';
+
+				// Get cleaned up list... return only those forums not having the f_read permission
+				$forum_ary = $auth->acl_getf('!f_read', true);
+				$forum_ary = array_unique(array_keys($forum_ary));
+
+				// Determine first forum the user is able to read into - for global announcement link
+				$sql = 'SELECT forum_id
+					FROM ' . FORUMS_TABLE . '
+					WHERE forum_type = ' . FORUM_POST;
+
+				if (sizeof($forum_ary))
+				{
+					$sql .= ' AND ' . $db->sql_in_set('forum_id', $forum_ary, true);
+				}
+				$result = $db->sql_query_limit($sql, 1);
+				$g_forum_id = (int) $db->sql_fetchfield('forum_id');
+				$db->sql_freeresult($result);
+
+				$sql = "SELECT t.* $sql_select
+					FROM $sql_from
+					WHERE t.forum_id = 0
+						AND t.topic_type = " . POST_GLOBAL . '
+					ORDER BY t.topic_last_post_time DESC';
+
+				$topic_list = $rowset = array();
+				// If the user can't see any forums, he can't read any posts because fid of 0 is invalid
+				if ($g_forum_id)
+				{
+					$result = $db->sql_query($sql);
+
+					while ($row = $db->sql_fetchrow($result))
+					{
+						$topic_list[] = $row['topic_id'];
+						$rowset[$row['topic_id']] = $row;
+					}
+					$db->sql_freeresult($result);
+				}
+
+				$topic_tracking_info = array();
+				if ($config['load_db_lastread'] && $user->data['is_registered'])
+				{
+					$topic_tracking_info = get_topic_tracking(0, $topic_list, $rowset, false, $topic_list);
+				}
+				else
+				{
+					$topic_tracking_info = get_complete_topic_tracking(0, $topic_list, $topic_list);
+				}
+
+				foreach ($topic_list as $topic_id)
+				{
+					$row = &$rowset[$topic_id];
+
+					$forum_id = $row['forum_id'];
+					$topic_id = $row['topic_id'];
+
+					$unread_topic = (isset($topic_tracking_info[$topic_id]) && $row['topic_last_post_time'] > $topic_tracking_info[$topic_id]) ? true : false;
+                    // Grab icons
+                    $icons = $cache->obtain_icons();
+
+					$folder_img = ($unread_topic) ? $folder_new : $folder;
+					$folder_alt = ($unread_topic) ? 'UNREAD_POSTS' : (($row['topic_status'] == ITEM_LOCKED) ? 'TOPIC_LOCKED' : 'NO_UNREAD_POSTS');
+                    $topic_link = append_sid("{$phpbb_root_path}viewtopic.$phpEx", 'f=' . $row['forum_id'] . '&amp;t=' . $row['topic_id']);
+                    $topic_views = $user->lang($row['topic_views']);
+                    $topic_replies = $user->lang($row['topic_replies']);
+                    $topic_last_author = get_username_string('full', $row['topic_last_poster_id'], $row['topic_last_poster_name'], $row['topic_last_poster_colour']);
+      
+					if ($row['topic_status'] == ITEM_LOCKED)
+					{
+						$folder_img .= '_locked';
+					}
+
+					// Posted image?
+					if (!empty($row['topic_posted']) && $row['topic_posted'])
+					{
+						$folder_img .= '_mine';
+					}
+
+					$template->assign_block_vars('topicrow', array(
+						'FORUM_ID'					=> $forum_id,
+						'TOPIC_ID'					=> $topic_id,
+						'TOPIC_AUTHOR'				=> get_username_string('username', $row['topic_poster'], $row['topic_first_poster_name'], $row['topic_first_poster_colour']),
+						'TOPIC_AUTHOR_COLOUR'		=> get_username_string('colour', $row['topic_poster'], $row['topic_first_poster_name'], $row['topic_first_poster_colour']),
+						'TOPIC_AUTHOR_FULL'			=> get_username_string('full', $row['topic_poster'], $row['topic_first_poster_name'], $row['topic_first_poster_colour']),
+						'FIRST_POST_TIME'			=> $user->format_date($row['topic_time']),
+						'LAST_POST_SUBJECT'			=> censor_text($row['topic_last_post_subject']),
+						'LAST_POST_TIME'			=> $user->format_date($row['topic_last_post_time']),
+						'LAST_VIEW_TIME'			=> $user->format_date($row['topic_last_view_time']),
+						'LAST_POST_AUTHOR'			=> get_username_string('username', $row['topic_last_poster_id'], $row['topic_last_poster_name'], $row['topic_last_poster_colour']),
+						'LAST_POST_AUTHOR_COLOUR'	=> get_username_string('colour', $row['topic_last_poster_id'], $row['topic_last_poster_name'], $row['topic_last_poster_colour']),
+						'LAST_POST_AUTHOR_FULL'		=> get_username_string('full', $row['topic_last_poster_id'], $row['topic_last_poster_name'], $row['topic_last_poster_colour']),
+						'TOPIC_TITLE'				=> censor_text($row['topic_title']),
+						'TOPIC_TYPE'				=> $topic_type,
+                        'TOPIC_LINK'                => $topic_link,
+	                    'REPLIES'			        => $topic_replies,
+	                    'VIEWS'				        => $topic_views,
+		                'TOPIC_LAST_AUTHOR'         => $topic_last_author,
+						'TOPIC_FOLDER_IMG'		=> $user->img($folder_img, $folder_alt),
+						'TOPIC_FOLDER_IMG_SRC'	=> $user->img($folder_img, $folder_alt, false, '', 'src'),
+                        'TOPIC_ICON_IMG'		=> (!empty($icons[$row['icon_id']])) ? $icons[$row['icon_id']]['img'] : '',
+			            'TOPIC_ICON_IMG_WIDTH'	=> (!empty($icons[$row['icon_id']])) ? $icons[$row['icon_id']]['width'] : '',
+			            'TOPIC_ICON_IMG_HEIGHT'	=> (!empty($icons[$row['icon_id']])) ? $icons[$row['icon_id']]['height'] : '',
+			
+						'S_USER_POSTED'		=> (!empty($row['topic_posted']) && $row['topic_posted']) ? true : false,
+						'S_UNREAD'			=> $unread_topic,
+
+						'U_TOPIC_AUTHOR'		=> get_username_string('profile', $row['topic_poster'], $row['topic_first_poster_name'], $row['topic_first_poster_colour']),
+						'U_LAST_POST'			=> append_sid("{$phpbb_root_path}viewtopic.$phpEx", "f=$g_forum_id&amp;t=$topic_id&amp;p=" . $row['topic_last_post_id']) . '#p' . $row['topic_last_post_id'],
+						'U_LAST_POST_AUTHOR'	=> get_username_string('profile', $row['topic_last_poster_id'], $row['topic_last_poster_name'], $row['topic_last_poster_colour']),
+						'U_NEWEST_POST'			=> append_sid("{$phpbb_root_path}viewtopic.$phpEx", "f=$g_forum_id&amp;t=$topic_id&amp;view=unread") . '#unread',
+						'U_VIEW_TOPIC'			=> append_sid("{$phpbb_root_path}viewtopic.$phpEx", "f=$g_forum_id&amp;t=$topic_id"))
+					);
+				}
+				
+// END Global Announcements
 
 // Output page
 page_header($user->lang['INDEX']);
